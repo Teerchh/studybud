@@ -1,6 +1,7 @@
 {
   "builds": [{ "src": "studybud/wsgi.py", "use": "@vercel/python", "config": { "buildCommand": "python manage.py collectstatic --noinput" } }],
   "routes": [
+    { "src": "/static/(.*)", "dest": "/static_files/$1" },
     { "src": "/(.*)", "dest": "studybud/wsgi.py" }
   ]
 }
