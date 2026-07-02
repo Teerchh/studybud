@@ -133,7 +133,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 MEDIA_URL = "images/"
 
-STATIC_ROOT = BASE_DIR / "static_files"
+STATIC_ROOT = BASE_DIR / "assets"
 MEDIA_ROOT = BASE_DIR / "assets/images"
 
 
