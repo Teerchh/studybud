@@ -130,6 +130,13 @@
 - [x] Created `Dockerfile` (multi-stage: Tailwind CSS → Python app → runtime) — build verified, `manage.py check` passes
 - [x] Created `.github/workflows/deploy.yml` (Docker build + checks; deploy to Vercel on push to `main`)
 - [x] Created `.dockerignore` + `.vercelignore`
-- [ ] Add GitHub repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
-- [ ] Note: after CSS changes, commit the compiled `static/css/tailwind.css` (whitenoise serves it from `static/`)
+- [x] Added GitHub repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+- [x] Set Vercel **Ignored Build Step** to a custom command (exit 0) → Vercel skips auto-builds; CI controls deploys
+- [x] Standing note: `static/css/tailwind.css` is **not committed** — CI runs `pnpm run build` and uploads it during deploy (Option B)
 - [x] `.vscode/settings.json` — file no longer present on disk (was untracked); nothing to confirm
+
+## 10. Status
+
+- ✅ Project running, dark theme, responsive, no green, static files serving on Vercel
+- ✅ CI/CD ready — next push to `main` runs Docker checks then auto-deploys to Vercel
+- ⏳ Only remaining: **revoke the old GitHub PAT** (`ghp_...`) on GitHub (user action)

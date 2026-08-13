@@ -10,6 +10,9 @@ __pycache__/
 # Node / Tailwind
 node_modules/
 
+# Compiled Tailwind output (built during CI deploy, not committed)
+static/css/tailwind.css
+
 # Django collected static (regenerated; keep out of git)
 assets/
 
