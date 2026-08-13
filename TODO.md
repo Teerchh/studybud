@@ -93,17 +93,41 @@
 - [x] Run `python manage.py collectstatic --noinput` successfully
 - [x] Run `python manage.py check` (no issues)
 - [x] Confirm compiled CSS has no `aquamarine` (local)
-- [ ] Decide `assets/` handling (committed STATIC_ROOT vs gitignored — see notes)
-- [ ] Untrack `.pyc` files + fix `origin` remote URL (remove embedded PAT) before pushing
-- [ ] Push to `main` and redeploy on Vercel (or dashboard → Redeploy)
+- [x] Decide `assets/` handling — untracked from git (added to `.gitignore`)
+- [x] Untrack `.pyc` / `__pycache__` + remove embedded PAT from `origin` remote URL
+- [x] Push to `main` via PR (`tailwind-integration` → `main`, merge commit `e8e6a4a` includes `e83d933`)
 - [ ] Hard-refresh deployed site and confirm green is gone + dark theme applied
+
+### ⚠️ Deploy issue — Vercel broken (IN PROGRESS / BLOCKED)
+
+> The live Vercel site (`studybud-phi.vercel.app`) serves the new HTML, but **ALL static files**
+> (e.g. `/static/css/tailwind.css`, `/static/js/script.js`) return **404 with MIME `text/html`** → the site is unstyled/broken.
+
+- **Cause:** `collectstatic` never ran on Vercel. The `vercel.json` build chain
+  (`pnpm install --frozen-lockfile && pnpm run build && python manage.py collectstatic --noinput`)
+  likely fails at the pnpm step, aborting before `collectstatic`.
+- **Task:** fix the Vercel build so static files are served — planned via new CI/CD (see § 9).
 
 ---
 
 ## 8. Housekeeping / Security
 
-- [ ] Revoke GitHub PAT embedded in `origin` remote URL (GitHub → Settings → Developer settings → PATs)
-- [ ] Re-add remote without token: `git remote set-url origin https://github.com/Teerchh/studybud.git`
+- [x] Remove embedded GitHub PAT from `origin` remote URL (re-added without token: `https://github.com/Teerchh/studybud.git`)
+- [ ] Revoke the old GitHub PAT (`ghp_...`) on GitHub → Settings → Developer settings → PATs
 - [x] Add `__pycache__/` + `*.py[cod]` to `.gitignore`
-- [ ] `git rm --cached` the already-tracked `.pyc` files
+- [x] Untrack `assets/`, `.vscode/`, `__pycache__/` from git; `.gitignore` updated for `node_modules/`, Tailwind output, `assets/`, `.vscode/`
 - [x] `.env*` already gitignored (never commit real secrets)
+- [x] Enabled Git Credential Manager
+
+---
+
+## 9. Planned Work — CI/CD (GitHub Actions + Docker)
+
+> Chosen approach to replace the fragile `vercel.json` `buildCommand` and reliably serve static files.
+
+- [ ] Set up GitHub Actions + Docker CI/CD:
+  - [ ] Docker container image with Python + Node + pnpm
+  - [ ] In CI run: `pnpm install`, `pnpm run build`, `python manage.py collectstatic --noinput`, and tests
+  - [ ] Deploy to Vercel via the CLI, using a `VERCEL_TOKEN` secret
+- [ ] Replace/fix the fragile `vercel.json` `buildCommand` with the new CI/CD pipeline
+- [ ] Confirm the `.vscode/settings.json` change was intentional (it was untracked)
