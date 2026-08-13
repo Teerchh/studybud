@@ -148,6 +148,11 @@ STORAGES = {
     },
 }
 
+# Serve static files directly from STATICFILES_DIRS (committed static/ folder)
+# so Vercel doesn't depend on collectstatic output (which isn't included in the
+# serverless function). Compile CSS with `pnpm run build` before committing.
+WHITENOISE_USE_FINDERS = True
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
