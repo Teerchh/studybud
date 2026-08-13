@@ -5,6 +5,5 @@ __pycache__
 node_modules
 .env*
 .vscode
-TODO.md
 Dockerfile
 .dockerignore
