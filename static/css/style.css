@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
-
 :root {
   --color-main: #71c6dd;
   --color-main-light: #e1f6fb;
@@ -420,16 +418,27 @@ a {
 .layout--2 > .container > div:last-child {
   flex-basis: 25%;
 }
+
+/* Center single-box pages (login, signup, create room, edit, delete, topics, activity)
+   in the space below the navbar (no fixed navbar offset => no stray scrollbar). */
+.layout:not(.layout--3):not(.layout--2) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-top: 0;
+}
+.layout:not(.layout--3):not(.layout--2) > .container {
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
 /*========== Layout Box ==========*/
 
 .layout__box {
-  width: 90%;
+  width: 100%;
   max-width: 48rem;
   min-height: 40rem;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%);
   background-color: var(--color-dark);
   border-radius: 1rem;
   box-shadow: 1px 1px 6px 3px rgba(0, 0, 0, 0.1);
@@ -832,6 +841,41 @@ a {
 .auth__action {
   margin-top: 3rem;
   text-align: center;
+}
+
+/* Signup: two-column fields so the form fits on screen */
+.form--signup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1.5rem;
+}
+.form--signup .form__group {
+  margin-bottom: 1.5rem;
+}
+.form--signup .btn--main {
+  grid-column: 1 / -1;
+  justify-content: center;
+}
+.form--signup input {
+  width: 100%;
+}
+@media screen and (max-width: 500px) {
+  .form--signup {
+    grid-template-columns: 1fr;
+  }
+  /* Compact auth pages so they fit on small screens */
+  .auth .layout__body {
+    margin: 1.5rem;
+  }
+  .auth__tagline {
+    margin-bottom: 1.5rem;
+  }
+  .auth .form__group {
+    margin-bottom: 1.2rem;
+  }
+  .auth__action {
+    margin-top: 1.5rem;
+  }
 }
 
 /*==============================
