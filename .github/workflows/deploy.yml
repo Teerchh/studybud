@@ -32,11 +32,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node + pnpm
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
+
+      # actions/setup-node does not install pnpm; install it explicitly (npm is
+      # always available on the runner).
+      - name: Install pnpm
+        run: npm install -g pnpm@10.33.0
 
       # Compile Tailwind here so the fresh `static/css/tailwind.css` is uploaded
       # with the deploy. It's gitignored, but the Vercel CLI uploads files from
