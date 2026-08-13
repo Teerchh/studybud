@@ -1,0 +1,44 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-check:
+    name: "Build + checks (Docker)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Stage 1+2 of the Dockerfile compile Tailwind CSS, install Python deps,
+      # run collectstatic, and run `manage.py check` — so this validates the
+      # whole build inside a reproducible container.
+      - name: "Build Docker image (target app)"
+        run: docker build --target app -t studybud:ci .
+
+      - name: Django system check
+        run: docker run --rm studybud:ci python manage.py check
+
+  deploy:
+    name: "Deploy to Vercel"
+    needs: build-and-check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Requires GitHub secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+      # Note: if your Vercel project also has Git auto-deploy enabled, pushes to
+      # main trigger two builds — disable Git auto-deploy (or this job) to avoid
+      # double deployments.
+      - name: "Deploy to Vercel (production)"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx vercel --prod --yes --token=$VERCEL_TOKEN

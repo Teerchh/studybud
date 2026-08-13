@@ -29,15 +29,15 @@
 - [x] Import existing `static/css/style.css` into the Tailwind build (preserve design)
 - [x] Add scripts: `build`, `watch`
 - [x] Install with `pnpm install` and verify `pnpm run build` compiles `static/css/tailwind.css`
-- [x] Add `node_modules/` + compiled `static/css/tailwind.css` to `.gitignore`
+- [x] Add `node_modules/` to `.gitignore` (compiled `static/css/tailwind.css` is now COMMITTED so whitenoise can serve it — see § 7)
 - [x] Delete `package-lock.json` (npm artifact); commit `pnpm-lock.yaml`
-- [x] Update `vercel.json` buildCommand: `pnpm install --frozen-lockfile && pnpm run build && python manage.py collectstatic --noinput`
+- [x] Update `vercel.json` buildCommand (originally pnpm chain; later simplified to `python manage.py collectstatic --noinput` for the deploy fix — see § 7)
 
 ---
 
 ## 2. Django Settings & Static Setup
 
-- [x] No settings changes needed — `STATICFILES_DIRS` already includes `static/`
+- [x] `STATICFILES_DIRS` already includes `static/`; added `WHITENOISE_USE_FINDERS = True` (deploy fix, § 7)
 - [x] `STATIC_ROOT` + whitenoise already configured for Vercel
 - [x] Verified `collectstatic --dry-run` picks up `static/css/tailwind.css`
 
@@ -57,15 +57,15 @@
 > Preserved via the imported `style.css` (no per-template utility rewrite needed).
 
 - [x] `base/templates/base/home.html` renders correctly (3-column layout)
-- [ ] `base/templates/base/room.html`
-- [ ] `base/templates/base/profile.html`
-- [ ] `base/templates/base/topics.html`
-- [ ] `base/templates/base/activity.html`
-- [ ] `base/templates/base/create_room.html`
-- [ ] `base/templates/base/edit_user.html`
-- [ ] `base/templates/base/delete.html`
-- [ ] `base/templates/base/login_register.html`
-- [ ] Components: `feed_component`, `topics_component`, `activity_component`
+- [x] `base/templates/base/room.html` renders correctly
+- [x] `base/templates/base/profile.html` renders correctly
+- [x] `base/templates/base/topics.html` renders correctly
+- [x] `base/templates/base/activity.html` renders correctly
+- [x] `base/templates/base/create_room.html` renders correctly
+- [x] `base/templates/base/edit_user.html` renders correctly
+- [x] `base/templates/base/delete.html` renders correctly
+- [x] `base/templates/base/login_register.html` renders correctly
+- [x] Components: `feed_component`, `topics_component`, `activity_component` render correctly
 
 ---
 
@@ -119,20 +119,17 @@
 - [x] Remove embedded GitHub PAT from `origin` remote URL (re-added without token: `https://github.com/Teerchh/studybud.git`)
 - [ ] Revoke the old GitHub PAT (`ghp_...`) on GitHub → Settings → Developer settings → PATs
 - [x] Add `__pycache__/` + `*.py[cod]` to `.gitignore`
-- [x] Untrack `assets/`, `.vscode/`, `__pycache__/` from git; `.gitignore` updated for `node_modules/`, Tailwind output, `assets/`, `.vscode/`
+- [x] Untrack `assets/`, `.vscode/`, `__pycache__/` from git; `.gitignore` updated for `node_modules/`, `assets/`, `.vscode/` (compiled `tailwind.css` now tracked — § 7)
 - [x] `.env*` already gitignored (never commit real secrets)
 - [x] Enabled Git Credential Manager
 
 ---
 
-## 9. Planned Work — CI/CD (GitHub Actions + Docker)
+## 9. CI/CD (GitHub Actions + Docker)
 
-> **Status:** the broken-deploy issue is already fixed via `WHITENOISE_USE_FINDERS` (see § 7).
-> CI/CD is now an **optional** improvement for reproducible builds + auto-deploys, not a blocker.
-
-- [ ] Set up GitHub Actions + Docker CI/CD:
-  - [ ] Docker container image with Python + Node + pnpm
-  - [ ] In CI run: `pnpm install`, `pnpm run build`, `python manage.py collectstatic --noinput`, and tests
-  - [ ] Deploy to Vercel via the CLI, using a `VERCEL_TOKEN` secret
-- [ ] Note: after CSS changes, remember to commit the compiled `static/css/tailwind.css` (whitenoise serves it from `static/`)
-- [ ] Confirm the `.vscode/settings.json` change was intentional (it was untracked)
+- [x] Created `Dockerfile` (multi-stage: Tailwind CSS → Python app → runtime) — build verified, `manage.py check` passes
+- [x] Created `.github/workflows/deploy.yml` (Docker build + checks; deploy to Vercel on push to `main`)
+- [x] Created `.dockerignore` + `.vercelignore`
+- [ ] Add GitHub repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+- [ ] Note: after CSS changes, commit the compiled `static/css/tailwind.css` (whitenoise serves it from `static/`)
+- [x] `.vscode/settings.json` — file no longer present on disk (was untracked); nothing to confirm
