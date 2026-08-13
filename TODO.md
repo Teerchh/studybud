@@ -96,17 +96,21 @@
 - [x] Decide `assets/` handling — untracked from git (added to `.gitignore`)
 - [x] Untrack `.pyc` / `__pycache__` + remove embedded PAT from `origin` remote URL
 - [x] Push to `main` via PR (`tailwind-integration` → `main`, merge commit `e8e6a4a` includes `e83d933`)
-- [ ] Hard-refresh deployed site and confirm green is gone + dark theme applied
+- [x] Hard-refresh deployed site and confirm green is gone + dark theme applied
 
-### ⚠️ Deploy issue — Vercel broken (IN PROGRESS / BLOCKED)
+### ✅ Deploy issue — RESOLVED
 
-> The live Vercel site (`studybud-phi.vercel.app`) serves the new HTML, but **ALL static files**
-> (e.g. `/static/css/tailwind.css`, `/static/js/script.js`) return **404 with MIME `text/html`** → the site is unstyled/broken.
+> Live Vercel site had **ALL static files 404** (new HTML served, but unstyled).
 
-- **Cause:** `collectstatic` never ran on Vercel. The `vercel.json` build chain
-  (`pnpm install --frozen-lockfile && pnpm run build && python manage.py collectstatic --noinput`)
-  likely fails at the pnpm step, aborting before `collectstatic`.
-- **Task:** fix the Vercel build so static files are served — planned via new CI/CD (see § 9).
+- **Cause:** Vercel's `@vercel/python` builder does **not** include `collectstatic` output
+  (`assets/`) in the deployed serverless function, and `pnpm` on Vercel silently required
+  `ENABLE_EXPERIMENTAL_COREPACK=1` — so the pnpm step aborted before `collectstatic`.
+- **Fix (deployed, commit `5d91d2c`, verified):**
+  - `WHITENOISE_USE_FINDERS = True` in `settings.py` → whitenoise serves static **directly
+    from the committed `static/` folder** at runtime (no `collectstatic`/`assets/` dependency).
+  - Committed compiled `static/css/tailwind.css` (single file).
+  - Simplified `vercel.json` build command to `python manage.py collectstatic --noinput`.
+  - Verified: `/static/*` returns 200, dark theme applied, no green.
 
 ---
 
@@ -123,11 +127,12 @@
 
 ## 9. Planned Work — CI/CD (GitHub Actions + Docker)
 
-> Chosen approach to replace the fragile `vercel.json` `buildCommand` and reliably serve static files.
+> **Status:** the broken-deploy issue is already fixed via `WHITENOISE_USE_FINDERS` (see § 7).
+> CI/CD is now an **optional** improvement for reproducible builds + auto-deploys, not a blocker.
 
 - [ ] Set up GitHub Actions + Docker CI/CD:
   - [ ] Docker container image with Python + Node + pnpm
   - [ ] In CI run: `pnpm install`, `pnpm run build`, `python manage.py collectstatic --noinput`, and tests
   - [ ] Deploy to Vercel via the CLI, using a `VERCEL_TOKEN` secret
-- [ ] Replace/fix the fragile `vercel.json` `buildCommand` with the new CI/CD pipeline
+- [ ] Note: after CSS changes, remember to commit the compiled `static/css/tailwind.css` (whitenoise serves it from `static/`)
 - [ ] Confirm the `.vscode/settings.json` change was intentional (it was untracked)
